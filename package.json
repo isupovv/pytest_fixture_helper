@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:pytest-fixture-helper.moveToFixture"
+    "onCommand:pytest-fixture-helper.moveToFixture",
+    "onLanguage:python"
   ],
   "main": "./dist/extension.js",
   "contributes": {

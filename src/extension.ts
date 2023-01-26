@@ -19,7 +19,11 @@ function getIndexOfNewCursorPosition(editor: vscode.TextEditor): Array<number> {
 			continue;
 		}
 
-		const listOfArguments = lineText.split('(').at(-1)!.split(')')[0].split(',');
+		const startOfArguments = lineText.split('(').at(-1);
+		if (!startOfArguments) {
+			continue;
+		}
+		const listOfArguments = startOfArguments.split(')')[0].split(',');
 		const filtredList = listOfArguments.filter(item => item.trim().split('=')[0].split(':')[0] === functionName);
 		if (filtredList.length > 0) {
 			continue;
@@ -44,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('pytest-fixture-helper.moveToFixture', () => {
+	let disposable = vscode.commands.registerCommand('pytest-fixture-helper.moveToFixture', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 
@@ -80,7 +84,8 @@ export function activate(context: vscode.ExtensionContext) {
 			.toString()
 			.split(':')[1];
 		
-		// vscode.window.showInformationMessage('Path is ' + folderPath);
+		let success = await vscode.commands.executeCommand('vscode.openFolder', filePath.split('/').pop().join('/'));
+		vscode.window.showInformationMessage('Path is ' + vscode.workspace.workspaceFolders);
 	});
 
 	context.subscriptions.push(disposable);
