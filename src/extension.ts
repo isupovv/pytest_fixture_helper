@@ -4,6 +4,35 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+
+function getIndexOfNewCursorPosition(editor: vscode.TextEditor): Array<number> {
+	const selection = editor.selection;
+	const functionName = editor.document.getText(selection);
+
+	const lineCount = editor.document.lineCount;
+
+	for (let i=0; i < lineCount; i++) {
+		const lineInfo = editor.document.lineAt(i);
+		const lineText = lineInfo.text;
+
+		if (!lineText.includes('def ') || lineInfo.isEmptyOrWhitespace) {
+			continue;
+		}
+
+		const listOfArguments = lineText.split('(').at(-1)!.split(')')[0].split(',');
+		const filtredList = listOfArguments.filter(item => item.trim().split('=')[0].split(':')[0] === functionName);
+		if (filtredList.length > 0) {
+			continue;
+		}
+
+		const indexOfFunctionStart = lineText.indexOf(functionName);
+		if (indexOfFunctionStart > 0) {
+			return [i, indexOfFunctionStart];
+		}
+	}
+	return [-1, -1];
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -32,27 +61,26 @@ export function activate(context: vscode.ExtensionContext) {
 		if (language !== 'python') {
 			return;
 		}
-		
-		const selection = editor.selection;
-		const text = editor.document.getText(selection);
-		vscode.window.showInformationMessage(text);
 
-		const lineCount = editor.document.lineCount;
+		const [newLinePosition, newCursorPosition] = getIndexOfNewCursorPosition(editor);
 
-		for (let i=0; i < lineCount; i++) {
-			const line = editor.document.lineAt(i);
-			if (line.text.includes(`def ${text}`)) {
-				let range = editor.document.lineAt(i).range;
-				editor.selection =  new vscode.Selection(range.start, range.end);
-				editor.revealRange(range);
-			}
+		if (newLinePosition !== -1 || newCursorPosition !== -1) {
+			const newPosition = new vscode.Position(newLinePosition, newCursorPosition);
+			const newRange = new vscode.Range(newPosition, newPosition);
+			editor.selection =  new vscode.Selection(
+				newPosition, 
+				newPosition
+			);
+			editor.revealRange(newRange);
 		}
-	
+
+		const filePath = editor.document.fileName;
+		
 		const folderPath = vscode.workspace.workspaceFolders[0].uri
 			.toString()
 			.split(':')[1];
 		
-		vscode.window.showInformationMessage('Path is ' + folderPath);
+		// vscode.window.showInformationMessage('Path is ' + folderPath);
 	});
 
 	context.subscriptions.push(disposable);
