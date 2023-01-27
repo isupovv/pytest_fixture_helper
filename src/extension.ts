@@ -126,12 +126,17 @@ export function activate(context: vscode.ExtensionContext) {
 				[newLinePosition, newCursorPosition] = getIndexOfNewCursorPosition(doc, functionName);
 
 				if (newLinePosition !== -1 || newCursorPosition !== -1) {
-					await vscode.window.showTextDocument(doc);
-					const newEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+					const newEditor: vscode.TextEditor = await vscode.window.showTextDocument(doc);
+					// const newEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 					
 					if (!newEditor) {
 						return;
 					}
+					// const symbolDefinitions = (await vscode.commands.executeCommand(
+					// 	'vscode.executeDefinitionProvider',
+					// 	newEditor.document.uri,
+					// 	new vscode.Position(newLinePosition, newCursorPosition)
+					//   )) as vscode.LocationLink[];
 					moveCursorToNewPosition(newEditor, newLinePosition, newCursorPosition);
 					return;
 				}
