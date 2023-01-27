@@ -58,41 +58,6 @@ function moveCursorToNewPosition (
 	editor.revealRange(newRange);
 }
 
-function getRangeOfText (cursorPosition: vscode.Position, lineWithFunctionName: string): vscode.Range {
-	// const cursorPosition = editor.selection.active;
-	// const lineWithFunctionName: string = editor.document.lineAt(cursorPosition.line).text;
-	const lineWithFunctionNameArray: string[] = lineWithFunctionName.split('');
-	const sepataros = ['(', ')', ':', '=', ',', ' '];
-
-	let i: number = cursorPosition.character - 1;
-	let j: number = cursorPosition.character;
-	let leftSideIndex: number = 0;
-	let rightSideIndex: number = 0;
-
-	while (i !== 0) {
-		const isSeparatorsInclude = sepataros.includes(lineWithFunctionNameArray[i]);
-		if (isSeparatorsInclude) {
-			leftSideIndex = i + 1;
-			break;
-		}
-		i--;
-	}
-
-	while (j !== lineWithFunctionNameArray.length) {
-		const isSeparatorsInclude = sepataros.includes(lineWithFunctionNameArray[j]);
-		if (isSeparatorsInclude) {
-			rightSideIndex = j;
-			break;
-		}
-		j++;
-	}
-
-	return new vscode.Range(
-		new vscode.Position(cursorPosition.line, leftSideIndex),
-		new vscode.Position(cursorPosition.line, rightSideIndex)
-	);
-}
-
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -120,7 +85,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const cursorPosition = editor.selection.active;
 		const lineWithFunctionName: string = editor.document.lineAt(cursorPosition.line).text;
-		const rangeOfFixtureName = getRangeOfText(cursorPosition, lineWithFunctionName);
+		const rangeOfFixtureName = editor.document.getWordRangeAtPosition(cursorPosition);
+		
 		const functionName: string = editor.document.getText(rangeOfFixtureName);
 		const isFunctionDeclarated: string = lineWithFunctionName.split(' ')[0].trim();
 		const functionArgumentsDirty: string[] = lineWithFunctionName.split('(')[1].split(')')[0].split(',');
@@ -166,7 +132,6 @@ export function activate(context: vscode.ExtensionContext) {
 					if (!newEditor) {
 						return;
 					}
-
 					moveCursorToNewPosition(newEditor, newLinePosition, newCursorPosition);
 					return;
 				}
