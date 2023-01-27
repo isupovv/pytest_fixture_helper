@@ -84,6 +84,16 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		const functionName: string = editor.document.getText(editor.selection);
+		const lineWithFunctionName: string = editor.document.lineAt(editor.selection.start.line).text;
+		const functionArgumentsDirty: string[] = lineWithFunctionName.split('(')[1].split(')')[0].split(',');
+		const functionArgumentsClean: string[] = functionArgumentsDirty.map(
+			(item: string): string => item.split('=')[0].split(':')[0].trim()
+		);
+
+		if (!functionArgumentsClean.includes(functionName)) {
+			return;
+		}
+
 		let [
 			newLinePosition,
 			newCursorPosition
@@ -108,7 +118,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 		while (rootFolder !== newFilePathList.at(-1)) {
 			newFilePathList.splice(-1);
-			vscode.window.showInformationMessage(`${newFilePathList.at(-1)}`);
 			const newFilePath: string = newFilePathList.join('/') + '/conftest.py';
 
 			try {
