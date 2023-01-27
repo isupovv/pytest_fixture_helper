@@ -85,12 +85,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const functionName: string = editor.document.getText(editor.selection);
 		const lineWithFunctionName: string = editor.document.lineAt(editor.selection.start.line).text;
+		const isDunctionDeclarated: string = lineWithFunctionName.split(' ')[0].trim();
 		const functionArgumentsDirty: string[] = lineWithFunctionName.split('(')[1].split(')')[0].split(',');
 		const functionArgumentsClean: string[] = functionArgumentsDirty.map(
 			(item: string): string => item.split('=')[0].split(':')[0].trim()
 		);
 
-		if (!functionArgumentsClean.includes(functionName)) {
+		if (!functionArgumentsClean.includes(functionName) && !isDunctionDeclarated) {
 			return;
 		}
 
@@ -123,14 +124,15 @@ export function activate(context: vscode.ExtensionContext) {
 			try {
 				const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(newFilePath);
 				[newLinePosition, newCursorPosition] = getIndexOfNewCursorPosition(doc, functionName);
-				await vscode.window.showTextDocument(doc);
-				const newEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-
-				if (!newEditor) {
-					return;
-				}
 
 				if (newLinePosition !== -1 || newCursorPosition !== -1) {
+					await vscode.window.showTextDocument(doc);
+					const newEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+					
+					if (!newEditor) {
+						return;
+					}
+					
 					moveCursorToNewPosition(newEditor, newLinePosition, newCursorPosition);
 					return;
 				}
