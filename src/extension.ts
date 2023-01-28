@@ -136,7 +136,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 					const pos = new vscode.Position(newLinePosition, newCursorPosition)
 					const docLink = new vscode.DocumentLink(new vscode.Range(pos, pos), newEditor.document.uri);
-					// vscode.DocumentLink.
 					moveCursorToNewPosition(newEditor, newLinePosition, newCursorPosition);
 					return;
 				}
