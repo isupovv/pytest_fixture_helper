@@ -86,6 +86,9 @@ export function activate(context: vscode.ExtensionContext) {
 		const cursorPosition = editor.selection.active;
 		const lineWithFunctionName: string = editor.document.lineAt(cursorPosition.line).text;
 		const rangeOfFixtureName = editor.document.getWordRangeAtPosition(cursorPosition);
+		if (!rangeOfFixtureName) {
+			return;
+		}
 		
 		const functionName: string = editor.document.getText(rangeOfFixtureName);
 		const isFunctionDeclarated: string = lineWithFunctionName.split(' ')[0].trim();
@@ -131,6 +134,9 @@ export function activate(context: vscode.ExtensionContext) {
 					if (!newEditor) {
 						return;
 					}
+					const pos = new vscode.Position(newLinePosition, newCursorPosition)
+					const docLink = new vscode.DocumentLink(new vscode.Range(pos, pos), newEditor.document.uri);
+					// vscode.DocumentLink.
 					moveCursorToNewPosition(newEditor, newLinePosition, newCursorPosition);
 					return;
 				}
